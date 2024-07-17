@@ -111,6 +111,8 @@ namespace SonicRetro.SonLVL.GUI
 		Point selpoint;
 		List<Point> locs = new List<Point>();
 		List<ushort> tiles = new List<ushort>();
+		List<bool> lxflip = new List<bool>();
+		List<bool> lyflip = new List<bool>();
 		Point lastchunkpoint;
 		Point lastmouse;
 		Stack<UndoAction> UndoList;
@@ -635,7 +637,7 @@ namespace SonicRetro.SonLVL.GUI
 			CollisionSelector.Images = new List<Bitmap>(LevelData.ColBmps);
 			CollisionSelector.ChangeSize();
 			ChunkSelector.SelectedIndex = 0;
-			ChunkPicture.Size = new Size(LevelData.Level.ChunkWidth, LevelData.Level.ChunkHeight);
+			ChunkPicture.Size = new Size(LevelData.Level.ChunkWidth*2, LevelData.Level.ChunkHeight*2);
 			flipChunkHButton.Enabled = flipChunkVButton.Enabled = true;
 			remapChunksButton.Enabled = remapBlocksButton.Enabled = remapTilesButton.Enabled = true;
 			importChunksToolStripButton.Enabled = LevelData.Chunks.Count < LevelData.GetChunkMax();
@@ -644,6 +646,8 @@ namespace SonicRetro.SonLVL.GUI
 			drawBlockToolStripButton.Enabled = importBlocksToolStripButton.Enabled;
 			importTilesToolStripButton.Enabled = LevelData.Tiles.Count < 0x800;
 			drawTileToolStripButton.Enabled = importTilesToolStripButton.Enabled;
+			chunkXFlip.Enabled = LevelData.LayoutFormat.HasXFlipFlag;
+			chunkYFlip.Enabled = LevelData.LayoutFormat.HasYFlipFlag;
 			BlockSelector.SelectedIndex = 0;
 			if (LevelData.Level.TwoPlayerCompatible)
 			{
@@ -890,6 +894,10 @@ namespace SonicRetro.SonLVL.GUI
 								LevelData.Layout.FGLayout[area.X + x, area.Y + y] = LevelData.Layout.FGLayout[area.X2.Value + x, area.Y2.Value + y];
 								if (LevelData.Layout.FGLoop != null)
 									LevelData.Layout.FGLoop[area.X + x, area.Y + y] = LevelData.Layout.FGLoop[area.X2.Value + x, area.Y2.Value + y];
+								if (LevelData.Layout.FGXFlip != null)
+									LevelData.Layout.FGXFlip[area.X + x, area.Y + y] = LevelData.Layout.FGXFlip[area.X2.Value + x, area.Y2.Value + y];
+								if (LevelData.Layout.FGYFlip != null)
+									LevelData.Layout.FGYFlip[area.X + x, area.Y + y] = LevelData.Layout.FGYFlip[area.X2.Value + x, area.Y2.Value + y];
 							}
 					}
 					else
@@ -906,6 +914,18 @@ namespace SonicRetro.SonLVL.GUI
 									LevelData.Layout.FGLoop[area.X + x, area.Y + y] = LevelData.Layout.FGLoop[area.X1 + x, area.Y1 + y];
 									LevelData.Layout.FGLoop[area.X1 + x, area.Y1 + y] = b;
 								}
+								if (LevelData.Layout.FGXFlip != null)
+								{
+									bool b = LevelData.Layout.FGXFlip[area.X + x, area.Y + y];
+									LevelData.Layout.FGXFlip[area.X + x, area.Y + y] = LevelData.Layout.FGXFlip[area.X1 + x, area.Y1 + y];
+									LevelData.Layout.FGXFlip[area.X1 + x, area.Y1 + y] = b;
+								}
+								if (LevelData.Layout.FGYFlip != null)
+								{
+									bool b = LevelData.Layout.FGYFlip[area.X + x, area.Y + y];
+									LevelData.Layout.FGYFlip[area.X + x, area.Y + y] = LevelData.Layout.FGYFlip[area.X1 + x, area.Y1 + y];
+									LevelData.Layout.FGYFlip[area.X1 + x, area.Y1 + y] = b;
+								}
 							}
 					}
 			}
@@ -921,6 +941,10 @@ namespace SonicRetro.SonLVL.GUI
 								LevelData.Layout.FGLayout[area.X + x, area.Y + y] = LevelData.Layout.FGLayout[area.X1 + x, area.Y1 + y];
 								if (LevelData.Layout.FGLoop != null)
 									LevelData.Layout.FGLoop[area.X + x, area.Y + y] = LevelData.Layout.FGLoop[area.X1 + x, area.Y1 + y];
+								if (LevelData.Layout.FGXFlip != null)
+									LevelData.Layout.FGXFlip[area.X + x, area.Y + y] = LevelData.Layout.FGXFlip[area.X1 + x, area.Y1 + y];
+								if (LevelData.Layout.FGYFlip != null)
+									LevelData.Layout.FGYFlip[area.X + x, area.Y + y] = LevelData.Layout.FGYFlip[area.X1 + x, area.Y1 + y];
 							}
 					}
 					else
@@ -936,6 +960,18 @@ namespace SonicRetro.SonLVL.GUI
 									bool b = LevelData.Layout.FGLoop[area.X + x, area.Y + y];
 									LevelData.Layout.FGLoop[area.X + x, area.Y + y] = LevelData.Layout.FGLoop[area.X1 + x, area.Y1 + y];
 									LevelData.Layout.FGLoop[area.X1 + x, area.Y1 + y] = b;
+								}
+								if (LevelData.Layout.FGXFlip != null)
+								{
+									bool b = LevelData.Layout.FGXFlip[area.X + x, area.Y + y];
+									LevelData.Layout.FGXFlip[area.X + x, area.Y + y] = LevelData.Layout.FGXFlip[area.X1 + x, area.Y1 + y];
+									LevelData.Layout.FGXFlip[area.X1 + x, area.Y1 + y] = b;
+								}
+								if (LevelData.Layout.FGYFlip != null)
+								{
+									bool b = LevelData.Layout.FGYFlip[area.X + x, area.Y + y];
+									LevelData.Layout.FGYFlip[area.X + x, area.Y + y] = LevelData.Layout.FGYFlip[area.X1 + x, area.Y1 + y];
+									LevelData.Layout.FGYFlip[area.X1 + x, area.Y1 + y] = b;
 								}
 							}
 					}
@@ -1922,10 +1958,16 @@ namespace SonicRetro.SonLVL.GUI
 				case Tab.Foreground:
 				case Tab.Background:
 					if (!selecting && SelectedChunk < LevelData.Chunks.Count)
+					{
+						if (chunkXFlip.Checked) LevelData.CompChunkBmps[SelectedChunk].RotateFlip(RotateFlipType.RotateNoneFlipX);
+						if (chunkYFlip.Checked) LevelData.CompChunkBmps[SelectedChunk].RotateFlip(RotateFlipType.RotateNoneFlipY);
 						LevelGfx.DrawImage(LevelData.CompChunkBmps[SelectedChunk],
-						new Rectangle(((((int)(pnlcur.X / ZoomLevel) + camera.X) / LevelData.Level.ChunkWidth) * LevelData.Level.ChunkWidth) - camera.X, ((((int)(pnlcur.Y / ZoomLevel) + camera.Y) / LevelData.Level.ChunkHeight) * LevelData.Level.ChunkHeight) - camera.Y, LevelData.Level.ChunkWidth, LevelData.Level.ChunkHeight),
-						0, 0, LevelData.Level.ChunkWidth, LevelData.Level.ChunkHeight,
-						GraphicsUnit.Pixel, imageTransparency);
+							new Rectangle(((((int)(pnlcur.X / ZoomLevel) + camera.X) / LevelData.Level.ChunkWidth) * LevelData.Level.ChunkWidth) - camera.X, ((((int)(pnlcur.Y / ZoomLevel) + camera.Y) / LevelData.Level.ChunkHeight) * LevelData.Level.ChunkHeight) - camera.Y, LevelData.Level.ChunkWidth, LevelData.Level.ChunkHeight),
+							0, 0, LevelData.Level.ChunkWidth, LevelData.Level.ChunkHeight,
+							GraphicsUnit.Pixel, imageTransparency);
+						if (chunkXFlip.Checked) LevelData.CompChunkBmps[SelectedChunk].RotateFlip(RotateFlipType.RotateNoneFlipX);
+						if (chunkYFlip.Checked) LevelData.CompChunkBmps[SelectedChunk].RotateFlip(RotateFlipType.RotateNoneFlipY);
+					}
 					if (!selection.IsEmpty)
 					{
 						Rectangle selbnds = selection.Scale(LevelData.Level.ChunkWidth, LevelData.Level.ChunkHeight);
@@ -2004,12 +2046,12 @@ namespace SonicRetro.SonLVL.GUI
 
 		private void UpdateScrollBars()
 		{
-			objectPanel.HScrollMaximum = (int)Math.Max(((LevelData.FGWidth + 1) * LevelData.Level.ChunkWidth) - (objectPanel.PanelWidth / ZoomLevel), 0);
-			objectPanel.VScrollMaximum = (int)Math.Max(((LevelData.FGHeight + 1) * LevelData.Level.ChunkHeight) - (objectPanel.PanelHeight / ZoomLevel), 0);
-			foregroundPanel.HScrollMaximum = (int)Math.Max(((LevelData.FGWidth + 1) * LevelData.Level.ChunkWidth) - (foregroundPanel.PanelWidth / ZoomLevel), 0);
-			foregroundPanel.VScrollMaximum = (int)Math.Max(((LevelData.FGHeight + 1) * LevelData.Level.ChunkHeight) - (foregroundPanel.PanelHeight / ZoomLevel), 0);
-			backgroundPanel.HScrollMaximum = (int)Math.Max(((LevelData.BGWidth + 1) * LevelData.Level.ChunkWidth) - (backgroundPanel.PanelWidth / ZoomLevel), 0);
-			backgroundPanel.VScrollMaximum = (int)Math.Max(((LevelData.BGHeight + 1) * LevelData.Level.ChunkHeight) - (backgroundPanel.PanelHeight / ZoomLevel), 0);
+			objectPanel.HScrollMaximum = (int)Math.Max(((LevelData.FGWidth) * LevelData.Level.ChunkWidth) - (objectPanel.PanelWidth / ZoomLevel) + 128, 0);
+			objectPanel.VScrollMaximum = (int)Math.Max(((LevelData.FGHeight) * LevelData.Level.ChunkHeight) - (objectPanel.PanelHeight / ZoomLevel) + 128, 0);
+			foregroundPanel.HScrollMaximum = (int)Math.Max(((LevelData.FGWidth) * LevelData.Level.ChunkWidth) - (foregroundPanel.PanelWidth / ZoomLevel) + 128, 0);
+			foregroundPanel.VScrollMaximum = (int)Math.Max(((LevelData.FGHeight) * LevelData.Level.ChunkHeight) - (foregroundPanel.PanelHeight / ZoomLevel) + 128, 0);
+			backgroundPanel.HScrollMaximum = (int)Math.Max(((LevelData.BGWidth) * LevelData.Level.ChunkWidth) - (backgroundPanel.PanelWidth / ZoomLevel) + 128, 0);
+			backgroundPanel.VScrollMaximum = (int)Math.Max(((LevelData.BGHeight) * LevelData.Level.ChunkHeight) - (backgroundPanel.PanelHeight / ZoomLevel) + 128, 0);
 		}
 
 		Rectangle prevbnds;
@@ -2799,14 +2841,27 @@ namespace SonicRetro.SonLVL.GUI
 					{
 						locs = new List<Point>();
 						tiles = new List<ushort>();
+						lxflip = new List<bool>();
+						lyflip = new List<bool>();
 						ushort t = LevelData.Layout.FGLayout[chunkpoint.X, chunkpoint.Y];
-						if (t != SelectedChunk)
+						bool hasFlip = false;
+						if (LevelData.LayoutFormat.HasXFlipFlag)
+							hasFlip = LevelData.Layout.FGXFlip[chunkpoint.X, chunkpoint.Y] != chunkXFlip.Checked;
+						if (LevelData.LayoutFormat.HasYFlipFlag)
+							hasFlip |= LevelData.Layout.FGYFlip[chunkpoint.X, chunkpoint.Y] != chunkYFlip.Checked;
+						if (t != SelectedChunk || hasFlip)
 						{
 							locs.Add(chunkpoint);
 							tiles.Add(t);
-							LevelData.Layout.FGLayout[chunkpoint.X, chunkpoint.Y] = (byte)SelectedChunk;
+							lxflip.Add(chunkXFlip.Checked);
+							lyflip.Add(chunkYFlip.Checked);
+							LevelData.Layout.FGLayout[chunkpoint.X, chunkpoint.Y] = SelectedChunk;
 							if (LevelData.LayoutFormat.HasLoopFlag)
 								LevelData.Layout.FGLoop[chunkpoint.X, chunkpoint.Y] = LevelData.Level.LoopChunks.Contains((byte)SelectedChunk);
+							if (LevelData.LayoutFormat.HasXFlipFlag)
+								LevelData.Layout.FGXFlip[chunkpoint.X, chunkpoint.Y] = chunkXFlip.Checked;
+							if (LevelData.LayoutFormat.HasYFlipFlag)
+								LevelData.Layout.FGYFlip[chunkpoint.X, chunkpoint.Y] = chunkYFlip.Checked;
 							DoLayoutCopy();
 						}
 					}
@@ -2835,13 +2890,24 @@ namespace SonicRetro.SonLVL.GUI
 			{
 				case MouseButtons.Left:
 					ushort c = LevelData.Layout.FGLayout[chunkpoint.X, chunkpoint.Y];
-					if (c != SelectedChunk)
+					bool hasFlip = false;
+					if (LevelData.LayoutFormat.HasXFlipFlag)
+						hasFlip = LevelData.Layout.FGXFlip[chunkpoint.X, chunkpoint.Y] != chunkXFlip.Checked;
+					if (LevelData.LayoutFormat.HasYFlipFlag)
+						hasFlip |= LevelData.Layout.FGYFlip[chunkpoint.X, chunkpoint.Y] != chunkYFlip.Checked;
+					if (c != SelectedChunk || hasFlip)
 					{
 						locs.Add(chunkpoint);
 						tiles.Add(c);
-						LevelData.Layout.FGLayout[chunkpoint.X, chunkpoint.Y] = (byte)SelectedChunk;
+						lxflip.Add(chunkXFlip.Checked);
+						lyflip.Add(chunkYFlip.Checked);
+						LevelData.Layout.FGLayout[chunkpoint.X, chunkpoint.Y] = SelectedChunk;
 						if (LevelData.LayoutFormat.HasLoopFlag)
 							LevelData.Layout.FGLoop[chunkpoint.X, chunkpoint.Y] = LevelData.Level.LoopChunks.Contains((byte)SelectedChunk);
+						if (LevelData.LayoutFormat.HasXFlipFlag)
+							LevelData.Layout.FGXFlip[chunkpoint.X, chunkpoint.Y] = chunkXFlip.Checked;
+						if (LevelData.LayoutFormat.HasYFlipFlag)
+							LevelData.Layout.FGYFlip[chunkpoint.X, chunkpoint.Y] = chunkYFlip.Checked;
 						DoLayoutCopy();
 						DrawLevel();
 					}
@@ -2885,7 +2951,7 @@ namespace SonicRetro.SonLVL.GUI
 			switch (e.Button)
 			{
 				case MouseButtons.Left:
-					if (locs.Count > 0) AddUndo(new LayoutEditUndoAction(1, locs, tiles));
+					if (locs.Count > 0) AddUndo(new LayoutEditUndoAction(1, locs, tiles, lxflip, lyflip));
 					DrawLevel();
 					break;
 				case MouseButtons.Right:
@@ -2897,6 +2963,10 @@ namespace SonicRetro.SonLVL.GUI
 						SelectedChunk = LevelData.Layout.FGLayout[chunkpoint.X, chunkpoint.Y];
 						if (SelectedChunk < LevelData.Chunks.Count)
 							ChunkSelector.SelectedIndex = SelectedChunk;
+						if (LevelData.LayoutFormat.HasXFlipFlag)
+							chunkXFlip.Checked = LevelData.Layout.FGXFlip[chunkpoint.X, chunkpoint.Y];
+						if (LevelData.LayoutFormat.HasYFlipFlag)
+							chunkYFlip.Checked = LevelData.Layout.FGYFlip[chunkpoint.X, chunkpoint.Y];
 						DrawLevel();
 					}
 					else if (!selecting)
@@ -2925,14 +2995,27 @@ namespace SonicRetro.SonLVL.GUI
 					{
 						locs = new List<Point>();
 						tiles = new List<ushort>();
+						lxflip = new List<bool>();
+						lyflip = new List<bool>();
 						ushort t = LevelData.Layout.BGLayout[chunkpoint.X, chunkpoint.Y];
-						if (t != SelectedChunk)
+						bool hasFlip = false;
+						if (LevelData.LayoutFormat.HasXFlipFlag)
+							hasFlip = LevelData.Layout.BGXFlip[chunkpoint.X, chunkpoint.Y] != chunkXFlip.Checked;
+						if (LevelData.LayoutFormat.HasYFlipFlag)
+							hasFlip |= LevelData.Layout.BGYFlip[chunkpoint.X, chunkpoint.Y] != chunkYFlip.Checked;
+						if (t != SelectedChunk || hasFlip)
 						{
 							locs.Add(chunkpoint);
 							tiles.Add(t);
-							LevelData.Layout.BGLayout[chunkpoint.X, chunkpoint.Y] = (byte)SelectedChunk;
+							lxflip.Add(chunkXFlip.Checked);
+							lyflip.Add(chunkYFlip.Checked);
+							LevelData.Layout.BGLayout[chunkpoint.X, chunkpoint.Y] = SelectedChunk;
 							if (LevelData.LayoutFormat.HasLoopFlag)
 								LevelData.Layout.BGLoop[chunkpoint.X, chunkpoint.Y] = LevelData.Level.LoopChunks.Contains((byte)SelectedChunk);
+							if (LevelData.LayoutFormat.HasXFlipFlag) 
+								LevelData.Layout.BGXFlip[chunkpoint.X, chunkpoint.Y] = chunkXFlip.Checked;
+							if (LevelData.LayoutFormat.HasYFlipFlag)
+								LevelData.Layout.BGYFlip[chunkpoint.X, chunkpoint.Y] = chunkYFlip.Checked;
 						}
 					}
 					DrawLevel();
@@ -2960,13 +3043,24 @@ namespace SonicRetro.SonLVL.GUI
 			{
 				case MouseButtons.Left:
 					ushort c = LevelData.Layout.BGLayout[chunkpoint.X, chunkpoint.Y];
-					if (c != SelectedChunk)
+					bool hasFlip = false;
+					if (LevelData.LayoutFormat.HasXFlipFlag)
+						hasFlip = LevelData.Layout.BGXFlip[chunkpoint.X, chunkpoint.Y] != chunkXFlip.Checked;
+					if (LevelData.LayoutFormat.HasYFlipFlag)
+						hasFlip |= LevelData.Layout.BGYFlip[chunkpoint.X, chunkpoint.Y] != chunkYFlip.Checked;
+					if (c != SelectedChunk || hasFlip)
 					{
 						locs.Add(chunkpoint);
 						tiles.Add(c);
-						LevelData.Layout.BGLayout[chunkpoint.X, chunkpoint.Y] = (byte)SelectedChunk;
+						lxflip.Add(chunkXFlip.Checked);
+						lyflip.Add(chunkYFlip.Checked);
+						LevelData.Layout.BGLayout[chunkpoint.X, chunkpoint.Y] = SelectedChunk;
 						if (LevelData.LayoutFormat.HasLoopFlag)
 							LevelData.Layout.BGLoop[chunkpoint.X, chunkpoint.Y] = LevelData.Level.LoopChunks.Contains((byte)SelectedChunk);
+						if (LevelData.LayoutFormat.HasXFlipFlag) 
+							LevelData.Layout.BGXFlip[chunkpoint.X, chunkpoint.Y] = chunkXFlip.Checked;
+						if (LevelData.LayoutFormat.HasYFlipFlag)
+							LevelData.Layout.BGYFlip[chunkpoint.X, chunkpoint.Y] = chunkYFlip.Checked;
 						DrawLevel();
 					}
 					break;
@@ -3009,7 +3103,7 @@ namespace SonicRetro.SonLVL.GUI
 			switch (e.Button)
 			{
 				case MouseButtons.Left:
-					if (locs.Count > 0) AddUndo(new LayoutEditUndoAction(2, locs, tiles));
+					if (locs.Count > 0) AddUndo(new LayoutEditUndoAction(2, locs, tiles, lxflip, lyflip));
 					DrawLevel();
 					break;
 				case MouseButtons.Right:
@@ -3021,6 +3115,10 @@ namespace SonicRetro.SonLVL.GUI
 						SelectedChunk = LevelData.Layout.BGLayout[chunkpoint.X, chunkpoint.Y];
 						if (SelectedChunk < LevelData.Chunks.Count)
 							ChunkSelector.SelectedIndex = SelectedChunk;
+						if (LevelData.LayoutFormat.HasXFlipFlag)
+							chunkXFlip.Checked = LevelData.Layout.BGXFlip[chunkpoint.X, chunkpoint.Y];
+						if (LevelData.LayoutFormat.HasYFlipFlag)
+							chunkYFlip.Checked = LevelData.Layout.BGYFlip[chunkpoint.X, chunkpoint.Y];
 						DrawLevel();
 					}
 					else if (!selecting)
@@ -3411,7 +3509,9 @@ namespace SonicRetro.SonLVL.GUI
 				case Tab.Foreground:
 					findToolStripMenuItem.Enabled = true;
 					findNextToolStripMenuItem.Enabled = findPreviousToolStripMenuItem.Enabled = lastfoundfgchunk.HasValue;
-					tabPage8.Controls.Add(ChunkSelector);
+					panel2.Controls.Add(ChunkSelector);
+					tabPage8.Controls.Add(chunkXFlip);
+					tabPage8.Controls.Add(chunkYFlip);
 					tabPage9.Controls.Add(layoutSectionSplitContainer);
 					ChunkSelector.AllowDrop = false;
 					foregroundPanel.Focus();
@@ -3419,7 +3519,9 @@ namespace SonicRetro.SonLVL.GUI
 				case Tab.Background:
 					findToolStripMenuItem.Enabled = true;
 					findNextToolStripMenuItem.Enabled = findPreviousToolStripMenuItem.Enabled = lastfoundbgchunk.HasValue;
-					tabPage10.Controls.Add(ChunkSelector);
+					panel3.Controls.Add(ChunkSelector);
+					tabPage10.Controls.Add(chunkXFlip);
+					tabPage10.Controls.Add(chunkYFlip);
 					tabPage11.Controls.Add(layoutSectionSplitContainer);
 					ChunkSelector.AllowDrop = false;
 					backgroundPanel.Focus();
@@ -3459,9 +3561,9 @@ namespace SonicRetro.SonLVL.GUI
 				ChunkPicture_MouseMove(sender, e);
 			else if (e.Button == chunkblockMouseSelect)
 			{
-				if (!SelectedChunkBlock.Contains(e.X / 16, e.Y / 16))
+				if (!SelectedChunkBlock.Contains(e.X / 32, e.Y / 32))   // if (!SelectedChunkBlock.Contains(e.X / 16, e.Y / 16))
 				{
-					SelectedChunkBlock = new Rectangle(e.X / 16, e.Y / 16, 1, 1);
+					SelectedChunkBlock = new Rectangle(e.X / 32, e.Y / 32, 1, 1); // SelectedChunkBlock = new Rectangle(e.X / 16, e.Y / 16, 1, 1);
 					copiedChunkBlock = LevelData.Chunks[SelectedChunk].Blocks[SelectedChunkBlock.X, SelectedChunkBlock.Y];
 					if (copiedChunkBlock.Block < LevelData.Blocks.Count)
 						BlockSelector.SelectedIndex = copiedChunkBlock.Block;
@@ -3477,10 +3579,10 @@ namespace SonicRetro.SonLVL.GUI
 		private void ChunkPicture_MouseMove(object sender, MouseEventArgs e)
 		{
 			if (!loaded) return;
-			if (e.X > 0 && e.Y > 0 && e.X < LevelData.Level.ChunkWidth && e.Y < LevelData.Level.ChunkHeight)
+			if (e.X > 0 && e.Y > 0 && e.X < LevelData.Level.ChunkWidth*2 && e.Y < LevelData.Level.ChunkHeight*2)
 				if (e.Button == chunkblockMouseDraw)
 				{
-					SelectedChunkBlock = new Rectangle(e.X / 16, e.Y / 16, 1, 1);
+					SelectedChunkBlock = new Rectangle(e.X / 32, e.Y / 32, 1, 1); // SelectedChunkBlock = new Rectangle(e.X / 16, e.Y / 16, 1, 1);
 					ChunkBlock destBlock = LevelData.Chunks[SelectedChunk].Blocks[SelectedChunkBlock.X, SelectedChunkBlock.Y];
 					destBlock.Block = copiedChunkBlock.Block;
 					destBlock.Solid1 = copiedChunkBlock.Solid1;
@@ -3500,7 +3602,8 @@ namespace SonicRetro.SonLVL.GUI
 							selecting = true;
 						else
 							return;
-					SelectedChunkBlock = Rectangle.FromLTRB(Math.Min(SelectedChunkBlock.Left, e.X / 16), Math.Min(SelectedChunkBlock.Top, e.Y / 16), Math.Max(SelectedChunkBlock.Right, e.X / 16 + 1), Math.Max(SelectedChunkBlock.Bottom, e.Y / 16 + 1));
+					SelectedChunkBlock = Rectangle.FromLTRB(Math.Min(SelectedChunkBlock.Left, e.X / 32), Math.Min(SelectedChunkBlock.Top, e.Y / 32), Math.Max(SelectedChunkBlock.Right, e.X / 32 + 1), Math.Max(SelectedChunkBlock.Bottom, e.Y / 32 + 1));
+					// SelectedChunkBlock = Rectangle.FromLTRB(Math.Min(SelectedChunkBlock.Left, e.X / 16), Math.Min(SelectedChunkBlock.Top, e.Y / 16), Math.Max(SelectedChunkBlock.Right, e.X / 16 + 1), Math.Max(SelectedChunkBlock.Bottom, e.Y / 16 + 1));
 					copiedChunkBlock = (chunkBlockEditor.SelectedObjects = GetSelectedChunkBlocks())[0];
 					DrawChunkPicture();
 				}
@@ -3668,7 +3771,7 @@ namespace SonicRetro.SonLVL.GUI
 			using (Graphics gfx = ChunkPicture.CreateGraphics())
 			{
 				gfx.SetOptions();
-				gfx.DrawImage(bmp.ToBitmap(LevelImgPalette), 0, 0, LevelData.Level.ChunkWidth, LevelData.Level.ChunkHeight);
+				gfx.DrawImage(bmp.ToBitmap(LevelImgPalette), 0, 0, LevelData.Level.ChunkWidth*2, LevelData.Level.ChunkHeight*2);
 			}
 		}
 
@@ -5534,14 +5637,14 @@ namespace SonicRetro.SonLVL.GUI
 				if (cnkb.FastArrayEqual(chunks[i]))
 				{
 					if (layout != null)
-						layout[cx, cy] = (byte)i;
+						layout[cx, cy] = (ushort)i;
 					return;
 				}
 			}
 			chunks.Add(cnkb);
 			newChunks.Add(cnk);
 			if (layout != null)
-				layout[cx, cy] = (byte)(LevelData.Chunks.Count + newChunks.Count - 1);
+				layout[cx, cy] = (ushort)(LevelData.Chunks.Count + newChunks.Count - 1);
 			return;
 		}
 
@@ -5952,22 +6055,28 @@ namespace SonicRetro.SonLVL.GUI
 		private void cutToolStripMenuItem1_Click(object sender, EventArgs e)
 		{
 			ushort[,] layout;
-			bool[,] loop;
+			bool[,] loop, xflip, yflip;
 			Rectangle selection;
 			if (CurrentTab == Tab.Background)
 			{
 				layout = LevelData.Layout.BGLayout;
 				loop = LevelData.Layout.BGLoop;
+				xflip = LevelData.Layout.BGXFlip;
+				yflip = LevelData.Layout.BGYFlip;
 				selection = BGSelection;
 			}
 			else
 			{
 				layout = LevelData.Layout.FGLayout;
 				loop = LevelData.Layout.FGLoop;
+				xflip = LevelData.Layout.FGXFlip;
+				yflip = LevelData.Layout.FGYFlip;
 				selection = FGSelection;
 			}
 			ushort[,] layoutsection = new ushort[selection.Width, selection.Height];
 			bool[,] loopsection = loop == null ? null : new bool[selection.Width, selection.Height];
+			bool[,] xflipsect = new bool[selection.Width, selection.Height];
+			bool[,] yflipsect = new bool[selection.Width, selection.Height];
 			for (int y = 0; y < selection.Height; y++)
 				for (int x = 0; x < selection.Width; x++)
 				{
@@ -5977,6 +6086,16 @@ namespace SonicRetro.SonLVL.GUI
 					{
 						loopsection[x, y] = loop[x + selection.X, y + selection.Y];
 						loop[x + selection.X, y + selection.Y] = false;
+					}
+					if (xflip != null)
+					{
+						xflipsect[x, y] = xflip[x + selection.X, y + selection.Y];
+						xflip[x + selection.X, y + selection.Y] = false;
+					}
+					if (yflip != null)
+					{
+						yflipsect[x, y] = yflip[x + selection.X, y + selection.Y];
+						yflip[x + selection.X, y + selection.Y] = false;
 					}
 				}
 			if (CurrentTab == Tab.Foreground) DoLayoutCopy();
@@ -6032,7 +6151,7 @@ namespace SonicRetro.SonLVL.GUI
 				}
 				SelectedObjectChanged();
 			}
-			Clipboard.SetData(typeof(LayoutSection).AssemblyQualifiedName, new LayoutSection(layoutsection, loopsection, objectselection));
+			Clipboard.SetData(typeof(LayoutSection).AssemblyQualifiedName, new LayoutSection(layoutsection, loopsection, xflipsect, yflipsect, objectselection));
 			DrawLevel();
 		}
 
@@ -6044,28 +6163,38 @@ namespace SonicRetro.SonLVL.GUI
 		private LayoutSection CreateLayoutSection()
 		{
 			ushort[,] layout;
-			bool[,] loop;
+			bool[,] loop, xflip, yflip;
 			Rectangle selection;
 			if (CurrentTab == Tab.Background)
 			{
 				layout = LevelData.Layout.BGLayout;
 				loop = LevelData.Layout.BGLoop;
+				xflip = LevelData.Layout.BGXFlip;
+				yflip = LevelData.Layout.BGYFlip;
 				selection = BGSelection;
 			}
 			else
 			{
 				layout = LevelData.Layout.FGLayout;
 				loop = LevelData.Layout.FGLoop;
+				xflip = LevelData.Layout.FGXFlip;
+				yflip = LevelData.Layout.FGYFlip;
 				selection = FGSelection;
 			}
 			ushort[,] layoutsection = new ushort[selection.Width, selection.Height];
 			bool[,] loopsection = loop == null ? null : new bool[selection.Width, selection.Height];
+			bool[,] xflipsect = new bool[selection.Width, selection.Height];
+			bool[,] yflipsect = new bool[selection.Width, selection.Height];
 			for (int y = 0; y < selection.Height; y++)
 				for (int x = 0; x < selection.Width; x++)
 				{
 					layoutsection[x, y] = layout[x + selection.X, y + selection.Y];
 					if (loop != null)
 						loopsection[x, y] = loop[x + selection.X, y + selection.Y];
+					if (xflip != null)
+						xflipsect[x, y] = xflip[x + selection.X, y + selection.Y];
+					if (yflip != null)
+						yflipsect[x, y] = yflip[x + selection.X, y + selection.Y];
 				}
 			List<Entry> objectselection = new List<Entry>();
 			if (includeObjectsWithForegroundSelectionToolStripMenuItem.Checked & CurrentTab == Tab.Foreground)
@@ -6103,7 +6232,7 @@ namespace SonicRetro.SonLVL.GUI
 							objectselection.Add(ent);
 						}
 			}
-			return new LayoutSection(layoutsection, loopsection, objectselection);
+			return new LayoutSection(layoutsection, loopsection, xflipsect, yflipsect, objectselection);
 		}
 
 		private void pasteOnceToolStripMenuItem_Click(object sender, EventArgs e)
@@ -6115,12 +6244,14 @@ namespace SonicRetro.SonLVL.GUI
 		private void PasteLayoutSectionOnce(LayoutSection section)
 		{
 			ushort[,] layout;
-			bool[,] loop;
+			bool[,] loop, xflip, yflip;
 			int w, h;
 			if (CurrentTab == Tab.Background)
 			{
 				layout = LevelData.Layout.BGLayout;
 				loop = LevelData.Layout.BGLoop;
+				xflip = LevelData.Layout.BGXFlip;
+				yflip = LevelData.Layout.BGYFlip;
 				w = Math.Min(section.Layout.GetLength(0), LevelData.BGWidth - menuLoc.X);
 				h = Math.Min(section.Layout.GetLength(1), LevelData.BGHeight - menuLoc.Y);
 			}
@@ -6128,6 +6259,8 @@ namespace SonicRetro.SonLVL.GUI
 			{
 				layout = LevelData.Layout.FGLayout;
 				loop = LevelData.Layout.FGLoop;
+				xflip = LevelData.Layout.FGXFlip;
+				yflip = LevelData.Layout.FGYFlip;
 				w = Math.Min(section.Layout.GetLength(0), LevelData.FGWidth - menuLoc.X);
 				h = Math.Min(section.Layout.GetLength(1), LevelData.FGHeight - menuLoc.Y);
 			}
@@ -6141,6 +6274,20 @@ namespace SonicRetro.SonLVL.GUI
 							loop[x + menuLoc.X, y + menuLoc.Y] = false;
 						else
 							loop[x + menuLoc.X, y + menuLoc.Y] = section.Loop[x, y];
+					}
+					if (xflip != null)
+					{
+						if (section.XFlip == null)
+							xflip[x + menuLoc.X, y + menuLoc.Y] = false;
+						else
+							xflip[x + menuLoc.X, y + menuLoc.Y] = section.XFlip[x, y];
+					}
+					if (yflip != null)
+					{
+						if (section.YFlip == null)
+							yflip[x + menuLoc.X, y + menuLoc.Y] = false;
+						else
+							yflip[x + menuLoc.X, y + menuLoc.Y] = section.YFlip[x, y];
 					}
 				}
 			if (CurrentTab == Tab.Foreground) DoLayoutCopy();
@@ -6177,18 +6324,22 @@ namespace SonicRetro.SonLVL.GUI
 		private void PasteLayoutSectionRepeating(LayoutSection section)
 		{
 			ushort[,] layout;
-			bool[,] loop;
+			bool[,] loop, xflip, yflip;
 			Rectangle selection;
 			if (CurrentTab == Tab.Background)
 			{
 				layout = LevelData.Layout.BGLayout;
 				loop = LevelData.Layout.BGLoop;
+				xflip = LevelData.Layout.BGXFlip;
+				yflip = LevelData.Layout.BGYFlip;
 				selection = BGSelection;
 			}
 			else
 			{
 				layout = LevelData.Layout.FGLayout;
 				loop = LevelData.Layout.FGLoop;
+				xflip = LevelData.Layout.FGXFlip;
+				yflip = LevelData.Layout.FGYFlip;
 				selection = FGSelection;
 			}
 			int width = section.Layout.GetLength(0);
@@ -6203,6 +6354,20 @@ namespace SonicRetro.SonLVL.GUI
 							loop[x + selection.X, y + selection.Y] = false;
 						else
 							loop[x + selection.X, y + selection.Y] = section.Loop[x % width, y % height];
+					}
+					if (xflip != null)
+					{
+						if (section.XFlip == null)
+							xflip[x + selection.X, y + selection.Y] = false;
+						else
+							xflip[x + selection.X, y + selection.Y] = section.XFlip[x % width, y % height];
+					}
+					if (yflip != null)
+					{
+						if (section.YFlip == null)
+							yflip[x + selection.X, y + selection.Y] = false;
+						else
+							yflip[x + selection.X, y + selection.Y] = section.YFlip[x % width, y % height];
 					}
 				}
 			if (CurrentTab == Tab.Foreground) DoLayoutCopy();
@@ -6244,18 +6409,22 @@ namespace SonicRetro.SonLVL.GUI
 		private void deleteToolStripMenuItem1_Click(object sender, EventArgs e)
 		{
 			ushort[,] layout;
-			bool[,] loop;
+			bool[,] loop, xflip, yflip;
 			Rectangle selection;
 			if (CurrentTab == Tab.Background)
 			{
 				layout = LevelData.Layout.BGLayout;
 				loop = LevelData.Layout.BGLoop;
+				xflip = LevelData.Layout.BGXFlip;
+				yflip = LevelData.Layout.BGYFlip;
 				selection = BGSelection;
 			}
 			else
 			{
 				layout = LevelData.Layout.FGLayout;
 				loop = LevelData.Layout.FGLoop;
+				xflip = LevelData.Layout.FGXFlip;
+				yflip = LevelData.Layout.FGYFlip;
 				selection = FGSelection;
 			}
 			for (int y = selection.Top; y < selection.Bottom; y++)
@@ -6264,6 +6433,10 @@ namespace SonicRetro.SonLVL.GUI
 					layout[x, y] = 0;
 					if (loop != null)
 						loop[x, y] = false;
+					if (xflip != null)
+						xflip[x, y] = false;
+					if (yflip != null)
+						yflip[x, y] = false;
 				}
 			if (CurrentTab == Tab.Foreground) DoLayoutCopy();
 			if (includeObjectsWithForegroundSelectionToolStripMenuItem.Checked & CurrentTab == Tab.Foreground)
@@ -6303,26 +6476,34 @@ namespace SonicRetro.SonLVL.GUI
 		private void fillToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			ushort[,] layout;
-			bool[,] loop;
+			bool[,] loop, xflip, yflip;
 			Rectangle selection;
 			if (CurrentTab == Tab.Background)
 			{
 				layout = LevelData.Layout.BGLayout;
 				loop = LevelData.Layout.BGLoop;
+				xflip = LevelData.Layout.BGXFlip;
+				yflip = LevelData.Layout.BGYFlip;
 				selection = BGSelection;
 			}
 			else
 			{
 				layout = LevelData.Layout.FGLayout;
 				loop = LevelData.Layout.FGLoop;
+				xflip = LevelData.Layout.FGXFlip;
+				yflip = LevelData.Layout.FGYFlip;
 				selection = FGSelection;
 			}
 			for (int y = selection.Top; y < selection.Bottom; y++)
 				for (int x = selection.Left; x < selection.Right; x++)
 				{
-					layout[x, y] = (byte)SelectedChunk;
+					layout[x, y] = SelectedChunk;
 					if (loop != null)
 						loop[x, y] = false;
+					if (xflip != null)
+						xflip[x, y] = false;
+					if (yflip != null)
+						yflip[x, y] = false;
 				}
 			if (CurrentTab == Tab.Foreground) DoLayoutCopy();
 			DrawLevel();
@@ -6378,6 +6559,10 @@ namespace SonicRetro.SonLVL.GUI
 							LevelData.Layout.FGLayout[area.X + x, area.Y + y] = LevelData.Layout.FGLayout[area.X2.Value + x, area.Y2.Value + y];
 							if (LevelData.Layout.FGLoop != null)
 								LevelData.Layout.FGLoop[area.X + x, area.Y + y] = LevelData.Layout.FGLoop[area.X2.Value + x, area.Y2.Value + y];
+							if (LevelData.Layout.FGXFlip != null)
+								LevelData.Layout.FGXFlip[area.X + x, area.Y + y] = LevelData.Layout.FGXFlip[area.X2.Value + x, area.Y2.Value + y];
+							if (LevelData.Layout.FGYFlip != null)
+								LevelData.Layout.FGYFlip[area.X + x, area.Y + y] = LevelData.Layout.FGYFlip[area.X2.Value + x, area.Y2.Value + y];
 						}
 				}
 				else
@@ -6393,6 +6578,18 @@ namespace SonicRetro.SonLVL.GUI
 								bool b = LevelData.Layout.FGLoop[area.X + x, area.Y + y];
 								LevelData.Layout.FGLoop[area.X + x, area.Y + y] = LevelData.Layout.FGLoop[area.X1 + x, area.Y1 + y];
 								LevelData.Layout.FGLoop[area.X1 + x, area.Y1 + y] = b;
+							}
+							if (LevelData.Layout.FGXFlip != null)
+							{
+								bool b = LevelData.Layout.FGXFlip[area.X + x, area.Y + y];
+								LevelData.Layout.FGXFlip[area.X + x, area.Y + y] = LevelData.Layout.FGXFlip[area.X1 + x, area.Y1 + y];
+								LevelData.Layout.FGXFlip[area.X1 + x, area.Y1 + y] = b;
+							}
+							if (LevelData.Layout.FGYFlip != null)
+							{
+								bool b = LevelData.Layout.FGYFlip[area.X + x, area.Y + y];
+								LevelData.Layout.FGYFlip[area.X + x, area.Y + y] = LevelData.Layout.FGYFlip[area.X1 + x, area.Y1 + y];
+								LevelData.Layout.FGYFlip[area.X1 + x, area.Y1 + y] = b;
 							}
 						}
 				}
@@ -6414,6 +6611,10 @@ namespace SonicRetro.SonLVL.GUI
 							LevelData.Layout.FGLayout[area.X + x, area.Y + y] = LevelData.Layout.FGLayout[area.X1 + x, area.Y1 + y];
 							if (LevelData.Layout.FGLoop != null)
 								LevelData.Layout.FGLoop[area.X + x, area.Y + y] = LevelData.Layout.FGLoop[area.X1 + x, area.Y1 + y];
+							if (LevelData.Layout.FGXFlip != null)
+								LevelData.Layout.FGXFlip[area.X + x, area.Y + y] = LevelData.Layout.FGXFlip[area.X2.Value + x, area.Y2.Value + y];
+							if (LevelData.Layout.FGYFlip != null)
+								LevelData.Layout.FGYFlip[area.X + x, area.Y + y] = LevelData.Layout.FGYFlip[area.X2.Value + x, area.Y2.Value + y];
 						}
 				}
 				else
@@ -6429,6 +6630,18 @@ namespace SonicRetro.SonLVL.GUI
 								bool b = LevelData.Layout.FGLoop[area.X + x, area.Y + y];
 								LevelData.Layout.FGLoop[area.X + x, area.Y + y] = LevelData.Layout.FGLoop[area.X1 + x, area.Y1 + y];
 								LevelData.Layout.FGLoop[area.X1 + x, area.Y1 + y] = b;
+							}
+							if (LevelData.Layout.FGXFlip != null)
+							{
+								bool b = LevelData.Layout.FGXFlip[area.X + x, area.Y + y];
+								LevelData.Layout.FGXFlip[area.X + x, area.Y + y] = LevelData.Layout.FGXFlip[area.X1 + x, area.Y1 + y];
+								LevelData.Layout.FGXFlip[area.X1 + x, area.Y1 + y] = b;
+							}
+							if (LevelData.Layout.FGYFlip != null)
+							{
+								bool b = LevelData.Layout.FGYFlip[area.X + x, area.Y + y];
+								LevelData.Layout.FGYFlip[area.X + x, area.Y + y] = LevelData.Layout.FGYFlip[area.X1 + x, area.Y1 + y];
+								LevelData.Layout.FGYFlip[area.X1 + x, area.Y1 + y] = b;
 							}
 						}
 				}
@@ -6457,6 +6670,10 @@ namespace SonicRetro.SonLVL.GUI
 						LevelData.Layout.FGLayout[dX + x, dY + y] = LevelData.Layout.FGLayout[area.X + x, area.Y + y];
 						if (LevelData.Layout.FGLoop != null)
 							LevelData.Layout.FGLoop[dX + x, dY + y] = LevelData.Layout.FGLoop[area.X + x, area.Y + y];
+						if (LevelData.Layout.FGXFlip != null)
+							LevelData.Layout.FGXFlip[dX + x, dY + y] = LevelData.Layout.FGXFlip[area.X + x, area.Y + y];
+						if (LevelData.Layout.FGYFlip != null)
+							LevelData.Layout.FGYFlip[dX + x, dY + y] = LevelData.Layout.FGYFlip[area.X + x, area.Y + y];
 					}
 			}
 		}
@@ -6551,13 +6768,15 @@ namespace SonicRetro.SonLVL.GUI
 				if (dlg.shiftH.Checked)
 				{
 					ushort[,] layout;
-					bool[,] loop;
+					bool[,] loop, xflip, yflip;
 					if (CurrentTab == Tab.Background)
 					{
 						if (LevelData.LayoutFormat.IsResizable && maxsize.Width > LevelData.BGWidth)
 							LevelData.ResizeBG(Math.Min(maxsize.Width, LevelData.BGWidth + selection.Width), LevelData.BGHeight);
 						layout = LevelData.Layout.BGLayout;
 						loop = LevelData.Layout.BGLoop;
+						xflip = LevelData.Layout.BGXFlip;
+						yflip = LevelData.Layout.BGYFlip;
 					}
 					else
 					{
@@ -6565,6 +6784,8 @@ namespace SonicRetro.SonLVL.GUI
 							LevelData.ResizeFG(Math.Min(maxsize.Width, LevelData.FGWidth + selection.Width), LevelData.FGHeight);
 						layout = LevelData.Layout.FGLayout;
 						loop = LevelData.Layout.FGLoop;
+						xflip = LevelData.Layout.FGXFlip;
+						yflip = LevelData.Layout.FGYFlip;
 					}
 					for (int y = selection.Top; y < selection.Bottom; y++)
 						for (int x = layout.GetLength(0) - selection.Width - 1; x >= selection.Left; x--)
@@ -6572,6 +6793,10 @@ namespace SonicRetro.SonLVL.GUI
 							layout[x + selection.Width, y] = layout[x, y];
 							if (loop != null)
 								loop[x + selection.Width, y] = loop[x, y];
+							if (xflip != null)
+								xflip[x + selection.Width, y] = xflip[x, y];
+							if (yflip != null)
+								yflip[x + selection.Width, y] = yflip[x, y];
 						}
 					for (int y = selection.Top; y < selection.Bottom; y++)
 						for (int x = selection.Left; x < selection.Right; x++)
@@ -6579,6 +6804,10 @@ namespace SonicRetro.SonLVL.GUI
 							layout[x, y] = 0;
 							if (loop != null)
 								loop[x, y] = false;
+							if (xflip != null)
+								xflip[x, y] = false;
+							if (yflip != null)
+								yflip[x, y] = false;
 						}
 					if (dlg.moveObjects.Checked)
 					{
@@ -6615,13 +6844,15 @@ namespace SonicRetro.SonLVL.GUI
 				else if (dlg.shiftV.Checked)
 				{
 					ushort[,] layout;
-					bool[,] loop;
+					bool[,] loop, xflip, yflip;
 					if (CurrentTab == Tab.Background)
 					{
 						if (LevelData.LayoutFormat.IsResizable && maxsize.Height > LevelData.BGHeight)
 							LevelData.ResizeBG(LevelData.BGWidth, Math.Min(maxsize.Height, LevelData.BGHeight + selection.Height));
 						layout = LevelData.Layout.BGLayout;
 						loop = LevelData.Layout.BGLoop;
+						xflip = LevelData.Layout.BGXFlip;
+						yflip = LevelData.Layout.BGYFlip;
 					}
 					else
 					{
@@ -6629,6 +6860,8 @@ namespace SonicRetro.SonLVL.GUI
 							LevelData.ResizeFG(LevelData.FGWidth, Math.Min(maxsize.Height, LevelData.FGHeight + selection.Height));
 						layout = LevelData.Layout.FGLayout;
 						loop = LevelData.Layout.FGLoop;
+						xflip = LevelData.Layout.FGXFlip;
+						yflip = LevelData.Layout.FGYFlip;
 					}
 					for (int x = selection.Left; x < selection.Right; x++)
 						for (int y = layout.GetLength(1) - selection.Height - 1; y >= selection.Top; y--)
@@ -6636,6 +6869,10 @@ namespace SonicRetro.SonLVL.GUI
 							layout[x, y + selection.Height] = layout[x, y];
 							if (loop != null)
 								loop[x, y + selection.Height] = loop[x, y];
+							if (xflip != null)
+								xflip[x, y + selection.Height] = xflip[x, y];
+							if (yflip != null)
+								yflip[x, y + selection.Height] = yflip[x, y];
 						}
 					for (int x = selection.Left; x < selection.Right; x++)
 						for (int y = selection.Top; y < selection.Bottom; y++)
@@ -6643,6 +6880,10 @@ namespace SonicRetro.SonLVL.GUI
 							layout[x, y] = 0;
 							if (loop != null)
 								loop[x, y] = false;
+							if (xflip != null)
+								xflip[x, y] = false;
+							if (yflip != null)
+								yflip[x, y] = false;
 						}
 					if (dlg.moveObjects.Checked)
 					{
@@ -6679,13 +6920,15 @@ namespace SonicRetro.SonLVL.GUI
 				else if (dlg.entireRow.Checked)
 				{
 					ushort[,] layout;
-					bool[,] loop;
+					bool[,] loop, xflip, yflip;
 					if (CurrentTab == Tab.Background)
 					{
 						if (LevelData.LayoutFormat.IsResizable && maxsize.Height > LevelData.BGHeight)
 							LevelData.ResizeBG(LevelData.BGWidth, Math.Min(maxsize.Height, LevelData.BGHeight + selection.Height));
 						layout = LevelData.Layout.BGLayout;
 						loop = LevelData.Layout.BGLoop;
+						xflip = LevelData.Layout.BGXFlip;
+						yflip = LevelData.Layout.BGYFlip;
 					}
 					else
 					{
@@ -6693,6 +6936,8 @@ namespace SonicRetro.SonLVL.GUI
 							LevelData.ResizeFG(LevelData.FGWidth, Math.Min(maxsize.Height, LevelData.FGHeight + selection.Height));
 						layout = LevelData.Layout.FGLayout;
 						loop = LevelData.Layout.FGLoop;
+						xflip = LevelData.Layout.FGXFlip;
+						yflip = LevelData.Layout.FGYFlip;
 					}
 					for (int x = 0; x < layout.GetLength(0); x++)
 						for (int y = layout.GetLength(1) - selection.Height - 1; y >= selection.Top; y--)
@@ -6700,6 +6945,10 @@ namespace SonicRetro.SonLVL.GUI
 							layout[x, y + selection.Height] = layout[x, y];
 							if (loop != null)
 								loop[x, y + selection.Height] = loop[x, y];
+							if (xflip != null)
+								xflip[x, y + selection.Height] = xflip[x, y];
+							if (yflip != null)
+								yflip[x, y + selection.Height] = yflip[x, y];
 						}
 					for (int x = 0; x < layout.GetLength(0); x++)
 						for (int y = selection.Top; y < selection.Bottom; y++)
@@ -6707,6 +6956,10 @@ namespace SonicRetro.SonLVL.GUI
 							layout[x, y] = 0;
 							if (loop != null)
 								loop[x, y] = false;
+							if (xflip != null)
+								xflip[x, y] = false;
+							if (yflip != null)
+								yflip[x, y] = false;
 						}
 					if (dlg.moveObjects.Checked)
 					{
@@ -6743,13 +6996,15 @@ namespace SonicRetro.SonLVL.GUI
 				else if (dlg.entireColumn.Checked)
 				{
 					ushort[,] layout;
-					bool[,] loop;
+					bool[,] loop, xflip, yflip;
 					if (CurrentTab == Tab.Background)
 					{
 						if (LevelData.LayoutFormat.IsResizable && maxsize.Width > LevelData.BGWidth)
 							LevelData.ResizeBG(Math.Min(maxsize.Width, LevelData.BGWidth + selection.Width), LevelData.BGHeight);
 						layout = LevelData.Layout.BGLayout;
 						loop = LevelData.Layout.BGLoop;
+						xflip = LevelData.Layout.BGXFlip;
+						yflip = LevelData.Layout.BGYFlip;
 					}
 					else
 					{
@@ -6757,6 +7012,8 @@ namespace SonicRetro.SonLVL.GUI
 							LevelData.ResizeFG(Math.Min(maxsize.Width, LevelData.FGWidth + selection.Width), LevelData.FGHeight);
 						layout = LevelData.Layout.FGLayout;
 						loop = LevelData.Layout.FGLoop;
+						xflip = LevelData.Layout.FGXFlip;
+						yflip = LevelData.Layout.FGYFlip;
 					}
 					for (int y = 0; y < layout.GetLength(1); y++)
 						for (int x = layout.GetLength(0) - selection.Width - 1; x >= selection.Left; x--)
@@ -6764,6 +7021,10 @@ namespace SonicRetro.SonLVL.GUI
 							layout[x + selection.Width, y] = layout[x, y];
 							if (loop != null)
 								loop[x + selection.Width, y] = loop[x, y];
+							if (xflip != null)
+								xflip[x + selection.Width, y] = xflip[x, y];
+							if (yflip != null)
+								yflip[x + selection.Width, y] = yflip[x, y];
 						}
 					for (int y = 0; y < layout.GetLength(1); y++)
 						for (int x = selection.Left; x < selection.Right; x++)
@@ -6771,6 +7032,10 @@ namespace SonicRetro.SonLVL.GUI
 							layout[x, y] = 0;
 							if (loop != null)
 								loop[x, y] = false;
+							if (xflip != null)
+								xflip[x, y] = false;
+							if (yflip != null)
+								yflip[x, y] = false;
 						}
 					if (dlg.moveObjects.Checked)
 					{
@@ -6825,16 +7090,20 @@ namespace SonicRetro.SonLVL.GUI
 				if (dlg.shiftH.Checked)
 				{
 					ushort[,] layout;
-					bool[,] loop;
+					bool[,] loop, xflip, yflip;
 					if (CurrentTab == Tab.Background)
 					{
 						layout = LevelData.Layout.BGLayout;
 						loop = LevelData.Layout.BGLoop;
+						xflip = LevelData.Layout.BGXFlip;
+						yflip = LevelData.Layout.BGYFlip;
 					}
 					else
 					{
 						layout = LevelData.Layout.FGLayout;
 						loop = LevelData.Layout.FGLoop;
+						xflip = LevelData.Layout.FGXFlip;
+						yflip = LevelData.Layout.FGYFlip;
 					}
 					for (int y = selection.Top; y < selection.Bottom; y++)
 						for (int x = selection.Left; x < layout.GetLength(0) - selection.Width; x++)
@@ -6842,6 +7111,10 @@ namespace SonicRetro.SonLVL.GUI
 							layout[x, y] = layout[x + selection.Width, y];
 							if (loop != null)
 								loop[x, y] = loop[x + selection.Width, y];
+							if (xflip != null)
+								xflip[x, y] = xflip[x + selection.Width, y];
+							if (yflip != null)
+								yflip[x, y] = yflip[x + selection.Width, y];
 						}
 					for (int y = selection.Top; y < selection.Bottom; y++)
 						for (int x = layout.GetLength(0) - selection.Width; x < layout.GetLength(0); x++)
@@ -6849,6 +7122,10 @@ namespace SonicRetro.SonLVL.GUI
 							layout[x, y] = 0;
 							if (loop != null)
 								loop[x, y] = false;
+							if (xflip != null)
+								xflip[x, y] = false;
+							if (yflip != null)
+								yflip[x, y] = false;
 						}
 					if (dlg.moveObjects.Checked)
 					{
@@ -6885,16 +7162,20 @@ namespace SonicRetro.SonLVL.GUI
 				else if (dlg.shiftV.Checked)
 				{
 					ushort[,] layout;
-					bool[,] loop;
+					bool[,] loop, xflip, yflip;
 					if (CurrentTab == Tab.Background)
 					{
 						layout = LevelData.Layout.BGLayout;
 						loop = LevelData.Layout.BGLoop;
+						xflip = LevelData.Layout.BGXFlip;
+						yflip = LevelData.Layout.BGYFlip;
 					}
 					else
 					{
 						layout = LevelData.Layout.FGLayout;
 						loop = LevelData.Layout.FGLoop;
+						xflip = LevelData.Layout.FGXFlip;
+						yflip = LevelData.Layout.FGYFlip;
 					}
 					for (int x = selection.Left; x < selection.Right; x++)
 						for (int y = selection.Top; y < layout.GetLength(1) - selection.Height; y++)
@@ -6902,6 +7183,10 @@ namespace SonicRetro.SonLVL.GUI
 							layout[x, y] = layout[x, y + selection.Height];
 							if (loop != null)
 								loop[x, y] = loop[x, y + selection.Height];
+							if (xflip != null)
+								xflip[x, y] = xflip[x, y + selection.Height];
+							if (yflip != null)
+								yflip[x, y] = yflip[x, y + selection.Height];
 						}
 					for (int x = selection.Left; x < selection.Right; x++)
 						for (int y = layout.GetLength(1) - selection.Height; y < layout.GetLength(1); y++)
@@ -6909,6 +7194,10 @@ namespace SonicRetro.SonLVL.GUI
 							layout[x, y] = 0;
 							if (loop != null)
 								loop[x, y] = false;
+							if (xflip != null)
+								xflip[x, y] = false;
+							if (yflip != null)
+								yflip[x, y] = false;
 						}
 					if (dlg.moveObjects.Checked)
 					{
@@ -6945,16 +7234,20 @@ namespace SonicRetro.SonLVL.GUI
 				else if (dlg.entireRow.Checked)
 				{
 					ushort[,] layout;
-					bool[,] loop;
+					bool[,] loop, xflip, yflip;
 					if (CurrentTab == Tab.Background)
 					{
 						layout = LevelData.Layout.BGLayout;
 						loop = LevelData.Layout.BGLoop;
+						xflip = LevelData.Layout.BGXFlip;
+						yflip = LevelData.Layout.BGYFlip;
 					}
 					else
 					{
 						layout = LevelData.Layout.FGLayout;
 						loop = LevelData.Layout.FGLoop;
+						xflip = LevelData.Layout.FGXFlip;
+						yflip = LevelData.Layout.FGYFlip;
 					}
 					for (int x = 0; x < layout.GetLength(0); x++)
 						for (int y = selection.Top; y < layout.GetLength(1) - selection.Height; y++)
@@ -6962,6 +7255,10 @@ namespace SonicRetro.SonLVL.GUI
 							layout[x, y] = layout[x, y + selection.Height];
 							if (loop != null)
 								loop[x, y] = loop[x, y + selection.Height];
+							if (xflip != null)
+								xflip[x, y] = xflip[x, y + selection.Height];
+							if (yflip != null)
+								yflip[x, y] = yflip[x, y + selection.Height];
 						}
 					for (int x = 0; x < layout.GetLength(0); x++)
 						for (int y = layout.GetLength(1) - selection.Height; y < layout.GetLength(1); y++)
@@ -6969,6 +7266,10 @@ namespace SonicRetro.SonLVL.GUI
 							layout[x, y] = 0;
 							if (loop != null)
 								loop[x, y] = false;
+							if (xflip != null)
+								xflip[x, y] = false;
+							if (yflip != null)
+								yflip[x, y] = false;
 						}
 					if (dlg.moveObjects.Checked)
 					{
@@ -7015,16 +7316,20 @@ namespace SonicRetro.SonLVL.GUI
 				else if (dlg.entireColumn.Checked)
 				{
 					ushort[,] layout;
-					bool[,] loop;
+					bool[,] loop, xflip, yflip;
 					if (CurrentTab == Tab.Background)
 					{
 						layout = LevelData.Layout.BGLayout;
 						loop = LevelData.Layout.BGLoop;
+						xflip = LevelData.Layout.BGXFlip;
+						yflip = LevelData.Layout.BGYFlip;
 					}
 					else
 					{
 						layout = LevelData.Layout.FGLayout;
 						loop = LevelData.Layout.FGLoop;
+						xflip = LevelData.Layout.FGXFlip;
+						yflip = LevelData.Layout.FGYFlip;
 					}
 					for (int y = 0; y < layout.GetLength(1); y++)
 						for (int x = selection.Left; x < layout.GetLength(0) - selection.Width; x++)
@@ -7032,6 +7337,10 @@ namespace SonicRetro.SonLVL.GUI
 							layout[x, y] = layout[x + selection.Width, y];
 							if (loop != null)
 								loop[x, y] = loop[x + selection.Width, y];
+							if (xflip != null)
+								xflip[x, y] = xflip[x + selection.Width, y];
+							if (yflip != null)
+								yflip[x, y] = yflip[x + selection.Width, y];
 						}
 					for (int y = 0; y < layout.GetLength(1); y++)
 						for (int x = layout.GetLength(0) - selection.Width; x < layout.GetLength(0); x++)
@@ -7039,6 +7348,10 @@ namespace SonicRetro.SonLVL.GUI
 							layout[x, y] = 0;
 							if (loop != null)
 								loop[x, y] = false;
+							if (xflip != null)
+								xflip[x, y] = false;
+							if (yflip != null)
+								yflip[x, y] = false;
 						}
 					if (dlg.moveObjects.Checked)
 					{
@@ -7313,9 +7626,9 @@ namespace SonicRetro.SonLVL.GUI
 		List<ObjectEntry> foundobjs;
 		int lastfoundobj;
 		Point? lastfoundfgchunk;
-		byte searchfgchunk;
+		ushort searchfgchunk;
 		Point? lastfoundbgchunk;
-		byte searchbgchunk;
+		ushort searchbgchunk;
 		private void findToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			switch (CurrentTab)
@@ -7385,7 +7698,7 @@ namespace SonicRetro.SonLVL.GUI
 									if (LevelData.Layout.FGLayout[x, y] == findFGChunksDialog.chunkSelect.Value)
 									{
 										lastfoundfgchunk = new Point(x, y);
-										searchfgchunk = (byte)findFGChunksDialog.chunkSelect.Value;
+										searchfgchunk = (ushort)findFGChunksDialog.chunkSelect.Value;
 										findNextToolStripMenuItem.Enabled = true;
 										findPreviousToolStripMenuItem.Enabled = false;
 										FGSelection = new Rectangle(x, y, 1, 1);
@@ -7422,7 +7735,7 @@ namespace SonicRetro.SonLVL.GUI
 									if (LevelData.Layout.BGLayout[x, y] == findBGChunksDialog.chunkSelect.Value)
 									{
 										lastfoundbgchunk = new Point(x, y);
-										searchbgchunk = (byte)findBGChunksDialog.chunkSelect.Value;
+										searchbgchunk = (ushort)findBGChunksDialog.chunkSelect.Value;
 										findNextToolStripMenuItem.Enabled = true;
 										findPreviousToolStripMenuItem.Enabled = false;
 										BGSelection = new Rectangle(x, y, 1, 1);
@@ -7703,8 +8016,8 @@ namespace SonicRetro.SonLVL.GUI
 			if (e.Data.GetDataPresent("SonLVLChunkIndex_" + pid))
 			{
 				Point clientPoint = ChunkSelector.PointToClient(new Point(e.X, e.Y));
-				byte newindex = (byte)ChunkSelector.GetItemAtPoint(clientPoint);
-				byte oldindex = (byte)(int)e.Data.GetData("SonLVLChunkIndex_" + pid);
+				ushort newindex = (ushort)ChunkSelector.GetItemAtPoint(clientPoint);
+				ushort oldindex = (ushort)(int)e.Data.GetData("SonLVLChunkIndex_" + pid);
 				if (newindex == oldindex) return;
 				if ((ModifierKeys & Keys.Control) == Keys.Control)
 				{
@@ -7739,16 +8052,16 @@ namespace SonicRetro.SonLVL.GUI
 						if (newindex > oldindex)
 						{
 							if (c == oldindex)
-								layout[x, y] = (byte)(newindex - 1);
+								layout[x, y] = (ushort)(newindex - 1);
 							else if (c > oldindex && c < newindex)
-								layout[x, y] = (byte)(c - 1);
+								layout[x, y] = (ushort)(c - 1);
 						}
 						else
 						{
 							if (c == oldindex)
 								layout[x, y] = newindex;
 							else if (c >= newindex && c < oldindex)
-								layout[x, y] = (byte)(c + 1);
+								layout[x, y] = (ushort)(c + 1);
 						}
 					});
 					if (newindex > oldindex)
@@ -8731,12 +9044,14 @@ namespace SonicRetro.SonLVL.GUI
 						if (!ImportImage(bmp, colbmp1, colbmp2, pribmp, section))
 							return;
 						ushort[,] layout;
-						bool[,] loop;
+						bool[,] loop, xflip, yflip;
 						int w, h;
 						if (CurrentTab == Tab.Background)
 						{
 							layout = LevelData.Layout.BGLayout;
 							loop = LevelData.Layout.BGLoop;
+							xflip = LevelData.Layout.BGXFlip;
+							yflip = LevelData.Layout.BGYFlip;
 							w = Math.Min(section.GetLength(0), LevelData.BGWidth - menuLoc.X);
 							h = Math.Min(section.GetLength(1), LevelData.BGHeight - menuLoc.Y);
 						}
@@ -8744,6 +9059,8 @@ namespace SonicRetro.SonLVL.GUI
 						{
 							layout = LevelData.Layout.FGLayout;
 							loop = LevelData.Layout.FGLoop;
+							xflip = LevelData.Layout.FGXFlip;
+							yflip = LevelData.Layout.FGYFlip;
 							w = Math.Min(section.GetLength(0), LevelData.FGWidth - menuLoc.X);
 							h = Math.Min(section.GetLength(1), LevelData.FGHeight - menuLoc.Y);
 						}
@@ -8753,6 +9070,10 @@ namespace SonicRetro.SonLVL.GUI
 								layout[x + menuLoc.X, y + menuLoc.Y] = section[x, y];
 								if (loop != null)
 									loop[x + menuLoc.X, y + menuLoc.Y] = false;
+								if (xflip != null)
+									xflip[x, y] = false;
+								if (yflip != null)
+									yflip[x, y] = false;
 							}
 						if (CurrentTab == Tab.Foreground) DoLayoutCopy();
 					}
@@ -8790,7 +9111,12 @@ namespace SonicRetro.SonLVL.GUI
 						ushort[,] layout = new ushort[bmp.Width / LevelData.Level.ChunkWidth, bmp.Height / LevelData.Level.ChunkHeight];
 						if (!ImportImage(bmp, colbmp1, colbmp2, pribmp, layout))
 							return;
-						LayoutSection section = new LayoutSection(layout, LevelData.LayoutFormat.HasLoopFlag ? new bool[layout.GetLength(0), layout.GetLength(1)] : null, new List<Entry>());
+						LayoutSection section = new LayoutSection(
+							layout,
+							LevelData.LayoutFormat.HasLoopFlag ? new bool[layout.GetLength(0), layout.GetLength(1)] : null,
+							LevelData.LayoutFormat.HasXFlipFlag ? new bool[layout.GetLength(0), layout.GetLength(1)] : null,
+							LevelData.LayoutFormat.HasYFlipFlag ? new bool[layout.GetLength(0), layout.GetLength(1)] : null,
+							new List<Entry>());
 						using (LayoutSectionNameDialog dlg = new LayoutSectionNameDialog() { Value = Path.GetFileNameWithoutExtension(opendlg.FileName) })
 						{
 							if (dlg.ShowDialog(this) == DialogResult.OK)
@@ -8935,18 +9261,18 @@ namespace SonicRetro.SonLVL.GUI
 			bool[] chunksused = new bool[LevelData.Chunks.Count];
 			// kind of hacky but whatever
 			if (LevelData.Level.LoopChunks != null)
-				foreach (byte ch in LevelData.Level.LoopChunks)
+				foreach (ushort ch in LevelData.Level.LoopChunks)
 					chunksused[ch + 1] = true;
 			LevelData.RemapLayouts((layout, x, y) =>
 			{
 				if (layout[x, y] < chunksused.Length)
 					chunksused[layout[x, y]] = true;
 			});
-			byte c = 0;
+			ushort c = 0;
 			Dictionary<ushort, ushort> chunkmap = new Dictionary<ushort, ushort>();
-			for (int i = 0; i < chunksused.Length; i++)
+			for (ushort i = 0; i < chunksused.Length; i++)
 				if (chunksused[i])
-					chunkmap[(byte)i] = c++;
+					chunkmap[i] = c++;
 			LevelData.RemapLayouts((layout, x, y) =>
 			{
 				if (chunkmap.ContainsKey(layout[x, y]))
@@ -8976,6 +9302,10 @@ namespace SonicRetro.SonLVL.GUI
 				Array.Clear(LevelData.Layout.FGLayout, 0, LevelData.FGWidth * LevelData.FGHeight);
 				if (LevelData.Layout.FGLoop != null)
 					Array.Clear(LevelData.Layout.FGLoop, 0, LevelData.FGWidth * LevelData.FGHeight);
+				if (LevelData.Layout.FGXFlip != null)
+					Array.Clear(LevelData.Layout.FGXFlip, 0, LevelData.FGWidth * LevelData.FGHeight);
+				if (LevelData.Layout.FGYFlip != null)
+					Array.Clear(LevelData.Layout.FGYFlip, 0, LevelData.FGWidth * LevelData.FGHeight);
 			}
 		}
 
@@ -8986,6 +9316,10 @@ namespace SonicRetro.SonLVL.GUI
 				Array.Clear(LevelData.Layout.BGLayout, 0, LevelData.BGWidth * LevelData.BGHeight);
 				if (LevelData.Layout.BGLoop != null)
 					Array.Clear(LevelData.Layout.BGLoop, 0, LevelData.BGWidth * LevelData.BGHeight);
+				if (LevelData.Layout.BGXFlip != null)
+					Array.Clear(LevelData.Layout.BGXFlip, 0, LevelData.BGWidth * LevelData.BGHeight);
+				if (LevelData.Layout.BGYFlip != null)
+					Array.Clear(LevelData.Layout.BGYFlip, 0, LevelData.BGWidth * LevelData.BGHeight);
 			}
 		}
 
@@ -9038,8 +9372,8 @@ namespace SonicRetro.SonLVL.GUI
 		{
 			if (replaceFGChunksDialog.ShowDialog(this) == DialogResult.OK)
 			{
-				byte fc = (byte)replaceFGChunksDialog.findChunk.Value;
-				byte rc = (byte)replaceFGChunksDialog.replaceChunk.Value;
+				ushort fc = (ushort)replaceFGChunksDialog.findChunk.Value;
+				ushort rc = (ushort)replaceFGChunksDialog.replaceChunk.Value;
 				int cnt = 0;
 				for (int y = 0; y < LevelData.FGHeight; y++)
 					for (int x = 0; x < LevelData.FGWidth; x++)
@@ -9057,8 +9391,8 @@ namespace SonicRetro.SonLVL.GUI
 		{
 			if (replaceBGChunksDialog.ShowDialog(this) == DialogResult.OK)
 			{
-				byte fc = (byte)replaceBGChunksDialog.findChunk.Value;
-				byte rc = (byte)replaceBGChunksDialog.replaceChunk.Value;
+				ushort fc = (ushort)replaceBGChunksDialog.findChunk.Value;
+				ushort rc = (ushort)replaceBGChunksDialog.replaceChunk.Value;
 				int cnt = 0;
 				for (int y = 0; y < LevelData.BGHeight; y++)
 					for (int x = 0; x < LevelData.BGWidth; x++)
@@ -10194,12 +10528,16 @@ namespace SonicRetro.SonLVL.GUI
 		public string Name { get; set; }
 		public ushort[,] Layout { get; set; }
 		public bool[,] Loop { get; set; }
+		public bool[,] XFlip { get; set; }
+		public bool[,] YFlip { get; set; }
 		public List<Entry> Objects { get; set; }
 
-		public LayoutSection(ushort[,] layout, bool[,] loop, List<Entry> objects)
+		public LayoutSection(ushort[,] layout, bool[,] loop, bool[,] xflip, bool[,] yflip, List<Entry> objects)
 		{
 			Layout = layout;
 			Loop = loop;
+			XFlip = xflip;
+			YFlip = yflip;
 			Objects = objects;
 		}
 	}
@@ -10333,19 +10671,24 @@ namespace SonicRetro.SonLVL.GUI
 	{
 		private List<Point> locations;
 		private List<ushort> oldtiles;
+		private List<bool> xflip;
+		private List<bool> yflip;
 		private int mode;
 
-		public LayoutEditUndoAction(int Mode, List<Point> Locations, List<ushort> OldTiles)
+		public LayoutEditUndoAction(int Mode, List<Point> Locations, List<ushort> OldTiles, List<bool> XFlip, List<bool> YFlip)
 		{
 			Name = "Layout Edit" + " (" + Locations.Count + " chunk" + (Locations.Count > 1 ? "s" : "") + ")";
 			mode = Mode;
 			locations = Locations;
 			oldtiles = OldTiles;
+			xflip = XFlip;
+			yflip = YFlip;
 		}
 
 		public override void Undo()
 		{
 			ushort t;
+			bool tx, ty;
 			switch (mode)
 			{
 				case 1:
@@ -10354,6 +10697,18 @@ namespace SonicRetro.SonLVL.GUI
 						t = LevelData.Layout.FGLayout[locations[i].X, locations[i].Y];
 						LevelData.Layout.FGLayout[locations[i].X, locations[i].Y] = oldtiles[i];
 						oldtiles[i] = t;
+						if (LevelData.Layout.FGXFlip != null && xflip != null)
+						{
+							tx = LevelData.Layout.FGXFlip[locations[i].X, locations[i].Y];
+							LevelData.Layout.FGXFlip[locations[i].X, locations[i].Y] = xflip[i];
+							xflip[i] = tx;
+						}
+						if (LevelData.Layout.FGYFlip != null && yflip != null)
+						{
+							ty = LevelData.Layout.FGYFlip[locations[i].X, locations[i].Y];
+							LevelData.Layout.FGYFlip[locations[i].X, locations[i].Y] = yflip[i];
+							yflip[i] = ty;
+						}
 					}
 					break;
 				case 2:
@@ -10362,6 +10717,18 @@ namespace SonicRetro.SonLVL.GUI
 						t = LevelData.Layout.BGLayout[locations[i].X, locations[i].Y];
 						LevelData.Layout.BGLayout[locations[i].X, locations[i].Y] = oldtiles[i];
 						oldtiles[i] = t;
+						if (LevelData.Layout.BGXFlip != null && xflip != null)
+						{
+							tx = LevelData.Layout.BGXFlip[locations[i].X, locations[i].Y];
+							LevelData.Layout.BGXFlip[locations[i].X, locations[i].Y] = xflip[i];
+							xflip[i] = tx;
+						}
+						if (LevelData.Layout.BGYFlip != null && yflip != null)
+						{
+							ty = LevelData.Layout.BGYFlip[locations[i].X, locations[i].Y];
+							LevelData.Layout.BGYFlip[locations[i].X, locations[i].Y] = yflip[i];
+							yflip[i] = ty;
+						}
 					}
 					break;
 			}
