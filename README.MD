@@ -16,3 +16,8 @@ Things I'd like to change or see changed in the future:
   - Default to collision FF when there is no collision rather than 00
   - Do more checks for mirroring blocks when no valid collision block is detected
 - Have "remove duplicates" function ignore differences in palette for tile 0 and collision for block 0
+- Allow files to be loaded individually rather than requiring project files
+- Allow chunk, block, and tile edits to be undone/redone
+- When multiple tile, block, or chunk files are loaded (e.g. Green Hill Zone, Sonic 3 & Knuckles), put them in separate categories
+  - Allow catagories to be added, removed, or merged
+- Add tabs in the layout editor for blocks and tiles. Clicking on a block or tile will highlight it in the layout
