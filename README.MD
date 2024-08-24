@@ -1,7 +1,6 @@
 This is a fork of SonLVL that makes it compatible with 64x64 chunks and word-sized entries in the layout file
 
 List of changes:
-- Added the changes in Devon's pull request, allowing for chunk flipping
 - SonLVL now uses words to store chunks rather than bytes
 - Fixed bug with 64x64 chunks where the window would be one chunk short
 - Chunk editor is zoomed in by 2x
