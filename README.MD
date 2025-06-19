@@ -20,3 +20,6 @@ Things I'd like to change or see changed in the future:
 - When multiple tile, block, or chunk files are loaded (e.g. Green Hill Zone, Sonic 3 & Knuckles), put them in separate categories
   - Allow catagories to be added, removed, or merged
 - Add tabs in the layout editor for blocks and tiles. Clicking on a block or tile will highlight it in the layout
+- Implement lavesiime's improvements:
+  - Faster rendering
+  - Fixed copy/pasting with custom formats
